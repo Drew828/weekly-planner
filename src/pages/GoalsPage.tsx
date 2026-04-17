@@ -7,6 +7,14 @@ import { Button } from "../components/ui/Button";
 export function GoalsPage() {
   const goals = useStore((s) => s.goals);
   const [showAddGoal, setShowAddGoal] = useState(false);
+  const [pastOpen, setPastOpen] = useState(false);
+
+  const activeGoals = goals.filter(
+    (g) => g.steps.length === 0 || g.steps.some((s) => !s.completed)
+  );
+  const completedGoals = goals.filter(
+    (g) => g.steps.length > 0 && g.steps.every((s) => s.completed)
+  );
 
   const totalSteps = goals.reduce((sum, g) => sum + g.steps.length, 0);
   const completedSteps = goals.reduce((sum, g) => sum + g.steps.filter((s) => s.completed).length, 0);
@@ -32,9 +40,31 @@ export function GoalsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {goals.map((goal) => (
+          {activeGoals.map((goal) => (
             <GoalCard key={goal.id} goal={goal} />
           ))}
+
+          {completedGoals.length > 0 && (
+            <div className="mt-2">
+              <button
+                onClick={() => setPastOpen((o) => !o)}
+                className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors cursor-pointer mb-2"
+              >
+                <span>{pastOpen ? "▲" : "▼"}</span>
+                Past Goals ({completedGoals.length})
+              </button>
+
+              {pastOpen && (
+                <div className="flex flex-col gap-3">
+                  {completedGoals.map((goal) => (
+                    <div key={goal.id} className="opacity-50 grayscale">
+                      <GoalCard goal={goal} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
